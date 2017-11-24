@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lc.info.dao.RoleDao">
+	<sql id = "role_columns">
+		id,role_name,role_remark,create_time,update_time,is_valid
+	</sql>
+	
+	<resultMap type="Role" id="RoleResult">
+		<result property="id" column="id"/>
+		<result property="roleName" column="role_name"/>
+		<result property="roleRemark" column="role_remark"/>
+		<result property="isValid" column="is_valid"/>
+		<result property="createTime" column="create_time"/>
+		<result property="updateTime" column="update_time"/>
+	</resultMap>
+	
+	<update id="delete" parameterMap="String">
+		update t_role
+		set
+			is_valid = 0,
+			update_time = now()
+		where
+			id in (${ids})
+	</update>
+	
+	<update id="update" parameterType="Role">
+		update t_role 
+		set 
+			role_name = #{roleName},
+			role_remark = #{roleRemark},
+			update_time = #{updateTime}
+		where 
+			id = #{id} and is_valid = 1
+	</update>
+	
+	<insert id="insert" parameterType="Role">
+		insert into t_role(
+			role_name,create_time,update_time,is_valid,role_remark
+		) values (
+			#{roleName},#{createTime},#{updateTime},1,#{roleRemark}
+		) 
+	</insert>
+	
+	<select id="selectForPage" resultMap="RoleResult">
+		select 
+			<include refid = "role_columns"/>
+		from 
+			t_role
+		where 
+			is_valid = 1
+		<if test="@Ognl@isNotEmpty(roleName)">
+			and role_name like '%${roleName}%'
+		</if>
+		<if test="@Ognl@isNotEmpty(roleRemark)">
+			and role_remark like '%${roleRemark}%'
+		</if>
+	</select>
+	
+</mapper>

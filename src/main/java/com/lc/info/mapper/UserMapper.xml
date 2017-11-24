@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lc.info.dao.UserDao">
+	<sql id = "user_columns">
+		id,user_name,password,create_time,update_time,is_valid,true_name,email,phone
+	</sql>
+	
+	<resultMap type="User" id="UserResult">
+		<result property="id" column="id"/>
+		<result property="userName" column="user_name"/>
+		<result property="password" column="password"/>
+		<result property="trueName" column="true_name"/>
+		<result property="email" column="email"/>
+		<result property="phone" column="phone"/>
+		<result property="isValid" column="is_valid"/>
+		<result property="createTime" column="create_time"/>
+		<result property="updateTime" column="update_time"/>
+	</resultMap>
+	
+	<select id="queryForPage" resultMap="UserResult">
+		select 
+			<include refid = "user_columns"/>
+		from 
+			t_user
+		where 
+			is_valid = 1
+		<if test="@Ognl@isNotEmpty(userName)">
+			and user_name like '%${userName}%'
+		</if>
+	</select>
+	
+	<update id="delete">
+		update t_user
+		set 
+			is_valid = 0,update_time = now()
+		where
+			id in (${ids})
+	</update>
+
+	<update id="update" parameterType="User">
+		update t_user 
+		set
+			user_name = #{userName},
+			password = #{password},
+			email = #{email},
+			phone = #{phone},
+			true_name = #{trueName},
+			update_time = #{updateTime}
+		where 
+			id = #{id} and is_valid = 1
+	</update>
+	
+	
+	<insert id = "insert" parameterType="User">
+		 insert into t_user (
+	   		user_name, password, true_name, email, phone, is_valid, create_time, update_time
+	    ) values (
+	    	 #{userName}, #{password}, #{trueName}, #{email}, #{phone}, 1, #{createTime}, #{updateTime}
+	    )	
+	</insert>
+
+
+	<select id = "findByUserName" resultType = "user">
+		select <include refid = "user_columns"/>
+		from t_user where is_valid = 1 and user_name = #{userName}
+	</select>
+	
+</mapper>
